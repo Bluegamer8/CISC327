@@ -60,3 +60,35 @@ def test_get_one_book_returns_correct_book(client):
     assert data["id"] == 1
     assert data["title"] == "The Hunger Games"
 
+def test_get_all_members_returns_all_created_members(client):
+    """GET /members returns a list containing all members that have been added.
+        Testing to make sure 2 members added to memebers were correctly gotten
+    """
+    member1_payload = {
+        "name": "Peter Hollander",
+        "email": "hollander25@example.com",
+    }
+    client.post("/members", json=member1_payload)#add member
+    member2_payload = {
+        "name": "Jimmy John",
+        "email": "jjohn@example.com",
+    }
+    client.post("/members", json=member2_payload)#add member
+
+
+    #calls get
+    response = client.get("/members")
+    assert response.status_code == 200
+
+
+    #checks to make sure all member match up correctly
+    members = response.get_json()
+    assert isinstance(members, list)
+    assert len(members) == 2
+    assert members[0]["id"] == 1
+    assert members[0]["name"] == "Peter Hollander"
+    assert members[0]["email"] == "hollander25@example.com"
+    assert members[1]["id"] == 2
+    assert members[1]["name"] == "Jimmy John"
+    assert members[1]["email"] == "jjohn@example.com"
+
