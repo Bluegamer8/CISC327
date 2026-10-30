@@ -37,4 +37,26 @@ def test_get_all_books_returns_all_created_books(client):
     assert books[1]["total_copies"] == 20
     assert books[1]["available_copies"] == 20
 
+def test_get_one_book_returns_correct_book(client):
+    """GET /books/<id> returns the matching book with the ID by checking the title.
+        Makes sure the id called returns expected book.
+    """
+    payload = {
+        "title": "The Hunger Games",
+        "author": "Suzanne Collins",
+        "isbn": "978-0123456789",
+        "total_copies": 1,
+    }
+    client.post("/books", json=payload) #add book
+
+
+    #called with id 1 since it is first book
+    response = client.get(f"/books/1")
+    assert response.status_code == 200
+
+
+    #checking to make sure correct book was gotten
+    data = response.get_json()
+    assert data["id"] == 1
+    assert data["title"] == "The Hunger Games"
 
