@@ -16,7 +16,7 @@ def test_update_book_returns_updated_data(client):
         "total_copies": 4,  
      })
 
-    # Check that the update response is correct.
+    # Check that the update is correct.
     assert response.status_code == 200
     data = response.get_json()
     assert data["title"] == "Cherry Grotter 2nd Edition"
@@ -24,6 +24,30 @@ def test_update_book_returns_updated_data(client):
     assert data["total_copies"] == 4
     assert data["id"] == 1
 
+def test_update_member_returns_updated_data(client):
+    """Test updating a member returns the updated data."""
+
+    # Create the member in the system.
+
+    response1 = client.post("/members", json={
+        "name": "Jeff M",
+        "email": "jeff@email.com"
+    })
+    assert response1.status_code == 201
+    member = response1.get_json()
+    member_id = member["id"]
+
+    # Update the member with new information.
+    response = client.put(f"/members/{member_id}", json={
+        "name": "Jeffery John",
+        "email": "j.john@email.com"
+    })
+
+
+    assert response.status_code == 200
+    data = response.get_json()
+    assert data["name"] == "Jeffery John"
+    assert data["email"] == "j.john@email.com"
 
 
 def test_delete_member_removes_from_store(client):
