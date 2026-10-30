@@ -134,3 +134,16 @@ def test_return_loaned_book_updates_status_copies(client):
     # Check that available copies increased back.
     book_after_return = client.get("/books/1")
     assert book_after_return.get_json()["available_copies"] == 1
+
+
+def test_update_nonexistant_value(client):
+    """ Test ensuring updating a nonexistant value returns 404 """
+    response = client.put("/books/1", json= {
+        "title": "Cherry Grotter 2nd Edition",
+        "author": "JK. R",
+        "genre": "Fantasy",
+        "isbn": "24999-000",
+        "total_copies": 4,  
+     })
+
+    assert response.status_code == 404
