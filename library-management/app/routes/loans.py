@@ -29,6 +29,9 @@ def checkout_book():
     if book is None:
         return jsonify({"error": "Book not found"}), 404
 
+    if data.available_copies < 1:
+        return jsonify({"error": "Book is not available for checkout"}), 400
+
     book.available_copies -= 1
 
     loan_id = store.next_id("loan")
@@ -40,7 +43,6 @@ def checkout_book():
     )
     store.loans[loan_id] = loan
     return jsonify(loan.to_dict()), 201
-
 
 @loans_bp.route("/<int:loan_id>/return", methods=["PUT"])
 def return_book(loan_id):

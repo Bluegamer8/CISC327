@@ -62,6 +62,8 @@ def loans_page():
         member_id = int(request.form["member_id"])
         book = store.books.get(book_id)
         if book is not None:
+            if book.available_copies < 1:
+                return render_template("loans.html", loans=store.loans.values(), error="No availble copies.")
             book.available_copies -= 1
             loan_id = store.next_id("loan")
             loan = Loan(
