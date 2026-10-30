@@ -75,3 +75,21 @@ def test_delete_member_removes_from_store(client):
     assert get_response.status_code == 404
 
 
+def test_delete_book_removes_from_library(client):
+    """Test deleting a book removes it from the library."""
+    
+    # Create the book in the system.
+    client.post("/books", json= {
+        "title": "Cherry Grotter",
+        "author": "JK. R",
+        "isbn": "24999-000",
+        "total_copies": 2,
+     })
+
+    # Delete the book by its ID.
+    response = client.delete("/books/1")
+    assert response.status_code in [200, 204]
+
+    # Check that the book can no longer be found.
+    get_response = client.get("/books/1")
+    assert get_response.status_code == 404
