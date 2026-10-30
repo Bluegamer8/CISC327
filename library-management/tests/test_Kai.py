@@ -92,3 +92,22 @@ def test_get_all_members_returns_all_created_members(client):
     assert members[1]["name"] == "Jimmy John"
     assert members[1]["email"] == "jjohn@example.com"
 
+def test_create_member_returns_created_member(client):
+    """A member POSTed to /members is returned with correct id and name.
+        Testing to make sure member is created properly and makes in the system
+    """
+    payload = {
+        "name": "Peter Hollander",
+        "email": "hollander25@example.com",
+    }
+
+
+    response = client.post("/members", json=payload)#add member
+    assert response.status_code == 201
+
+
+    #checks to make sure the correct member was added
+    data = response.get_json()
+    assert data["name"] == "Peter Hollander"
+    assert data["email"] == "hollander25@example.com"
+    assert data["id"] == 1
