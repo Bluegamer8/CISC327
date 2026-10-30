@@ -170,3 +170,65 @@ def test_check_out_book_creates_loan_and_decrements_copies(client):
     book_after_return = client.get(f"/books/1")
     assert book_after_return.get_json()["available_copies"] == 0
 
+
+def test_check_out_book_only_decrements_copies_when_available(client):
+    """POST /loans successfully checks out a book, creating a loan record and reducing available copies.
+        Tests to make sure that a checked out book is only deremeneted when there is copy available.
+    """
+    payload1 = {
+        "title": "The Hunger Games",
+        "author": "Suzanne Collins",
+        "isbn": "978-0123456789",
+        "total_copies": 1,
+    }
+    client.post("/books", json=payload1)#add book
+
+    payload2 = {
+        "name": "Peter Hollander",
+        "email": "hollander25@example.com",
+    }
+    client.post("/members", json=payload2)#add memeber
+
+    loan_payload = {
+        "book_id": 1,
+        "member_id": 1,
+    }
+    loan = client.post("/loans", json=loan_payload)#add loan
+    assert loan.status_code == 201
+
+    loan = client.post("/loans", json=loan_payload)#add loan which should fail
+    assert loan.status_code == 400
+
+    #checking book available copies amount
+    book_after_return = client.get(f"/books/1")
+    assert book_after_return.get_json()["available_copies"] == 0
+
+def test_check_out_book_where_starting_with_no_copies(client):
+    """POST /loans successfully checks out a book, creating a loan record and reducing available copies.
+        Tests to make sure that a checked out book is only deremeneted when there is copy available.
+    """
+    payload1 = {
+        "title": "The Hunger Games",
+        "author": "Suzanne Collins",
+        "isbn": "978-0123456789",
+        "total_copies": 0,
+    }
+    client.post("/books", json=payload1)#add book
+
+    payload2 = {
+        "name": "Peter Hollander",
+        "email": "hollander25@example.com",
+    }
+    client.post("/members", json=payload2)#add memeber
+
+    loan_payload = {
+        "book_id": 1,
+        "member_id": 1,
+    }
+    loan = client.post("/loans", json=loan_payload)#add loan
+    assert loan.status_code == 400
+
+    #checking book available copies amount
+    book_after_return = client.get(f"/books/1")
+    assert book_after_return.get_json()["available_copies"] == 0
+
