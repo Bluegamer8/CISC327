@@ -19,11 +19,16 @@ def list_books():
 def create_book():
     data = request.get_json()
     book_id = store.next_id("book")
+    genre1 = "Unknown"
+
+    if (data.get("genre") != None):
+        genre1 = data.get("genre")
+
     book = Book(
         id=book_id,
         title=data["title"],
         author=data["author"],
-        genre=data["genre"],
+        genre=genre1,
         isbn=data["isbn"],
         total_copies=data.get("total_copies", 1),
         available_copies=data.get("total_copies", 1),
