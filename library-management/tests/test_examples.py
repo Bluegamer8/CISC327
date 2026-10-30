@@ -34,6 +34,7 @@ def test_create_book_returns_created_book(client):
     payload = {
         "title": "Clean Code",
         "author": "Robert C. Martin",
+        "genre": "Unknown",
         "isbn": "978-0132350884",
         "total_copies": 2,
     }
@@ -43,5 +44,6 @@ def test_create_book_returns_created_book(client):
     data = response.get_json()
     assert data["title"] == "Clean Code"
     assert data["author"] == "Robert C. Martin"
+    assert data["genre"] == "Unknown"
     assert data["available_copies"] == 2
     assert data["id"] == 1  # first item in a fresh store always gets id=1

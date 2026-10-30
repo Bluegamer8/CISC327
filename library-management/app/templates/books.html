@@ -3,18 +3,33 @@
 <h1>Books</h1>
 <table>
   <tr>
-    <th>ID</th><th>Title</th><th>Author</th><th>ISBN</th><th>Total</th><th>Available</th><th></th>
+    <th>ID</th><th>Title</th><th>Author</th><th>Genre</th><th>ISBN</th><th>Total</th><th>Available</th><th>Actions</th>
   </tr>
   {% for book in books %}
   <tr>
     <td>{{ book.id }}</td>
     <td>{{ book.title }}</td>
     <td>{{ book.author }}</td>
+    <td>{{ book.genre }}</td>
     <td>{{ book.isbn }}</td>
     <td>{{ book.total_copies }}</td>
     <td>{{ book.available_copies }}</td>
     <td>
-      <form class="delete-form" method="post" action="{{ url_for('views.delete_book_page', book_id=book.id) }}">
+      <!-- edit dropdown -->
+      <details>
+        <summary style="cursor: pointer; color: blue; display: inline; margin-right: 5px;">Edit</summary>
+        <form method="post" action="{{ url_for('books.change_book', book_id=book.id) }}" style="margin-top: 10px; background: #f9f9f9; padding: 10px; border: 1px solid #ccc;">
+          <div><label>Title: <input type="text" name="title" value="{{ book.title }}" required></label></div>
+          <div><label>Author: <input type="text" name="author" value="{{ book.author }}" required></label></div>
+          <div><label>Genre: <input type="text" name="genre" value="{{ book.genre }}" required></label></div>
+          <div><label>ISBN: <input type="text" name="isbn" value="{{ book.isbn }}" required></label></div>
+          <div><label>Total: <input type="number" name="total_copies" value="{{ book.total_copies }}" min="1" required></label></div>
+          <button type="submit">Save Changes</button>
+        </form>
+      </details>
+
+      <!-- DELETE FORM -->
+      <form class="delete-form" method="post" action="{{ url_for('views.delete_book_page', book_id=book.id) }}" style="display:inline;">
         <button type="submit">Delete</button>
       </form>
     </td>
@@ -26,6 +41,7 @@
 <form method="post" action="{{ url_for('views.books_page') }}">
   <label>Title <input type="text" name="title" required></label>
   <label>Author <input type="text" name="author" required></label>
+  <label>Genre <input type="text" name="genre" required></label>
   <label>ISBN <input type="text" name="isbn" required></label>
   <label>Total Copies <input type="number" name="total_copies" value="1" min="1" required></label>
   <button type="submit">Add Book</button>

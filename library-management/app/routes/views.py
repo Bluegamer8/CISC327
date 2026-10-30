@@ -24,6 +24,7 @@ def books_page():
             id=book_id,
             title=request.form["title"],
             author=request.form["author"],
+            genre=request.form["genre"],
             isbn=request.form["isbn"],
             total_copies=total_copies,
             available_copies=total_copies,
