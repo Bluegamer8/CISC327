@@ -70,3 +70,30 @@ def test_update_member_returns_updated_data(client):
     assert data["email"] == "j.john@email.com"
 
 
+
+
+def test_delete_member_removes_from_store(client):
+
+    """Test deleting a member removes them from the store."""
+
+    # Create the member in the system.
+
+    client.post("/members", json={
+
+        "name": "Jane Doe",
+        "email": "jane@example.com"
+    })
+
+    # Delete the member by their ID.
+
+    response = client.delete("/members/1")
+
+    assert response.status_code in [200, 204]
+
+    # Check that the member can no longer be found.
+
+    get_response = client.get("/members/1")
+
+    assert get_response.status_code == 404
+
+
