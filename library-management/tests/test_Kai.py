@@ -131,3 +131,41 @@ def test_get_one_member_returns_correct_member(client):
     data = response.get_json()
     assert data["id"] == 1
     assert data["name"] == "Peter Hollander"
+
+def test_check_out_book_creates_loan_and_decrements_copies(client):
+    """POST /loans successfully checks out a book, creating a loan record and reducing available copies.
+        Tests to make sure that a checked out book isproperly checked out by matching the member id, book id
+        and the checkout id and laso checking the books availalbe copies
+    """
+    payload1 = {
+        "title": "The Hunger Games",
+        "author": "Suzanne Collins",
+        "isbn": "978-0123456789",
+        "total_copies": 1,
+    }
+    client.post("/books", json=payload1)#add book
+
+    payload2 = {
+        "name": "Peter Hollander",
+        "email": "hollander25@example.com",
+    }
+    client.post("/members", json=payload2)#add memeber
+
+    loan_payload = {
+        "book_id": 1,
+        "member_id": 1,
+    }
+    loan = client.post("/loans", json=loan_payload)#add loan
+    assert loan.status_code == 201
+
+
+    #checking for correct loan
+    loan_data = loan.get_json()
+    assert loan_data["book_id"] == 1
+    assert loan_data["member_id"] == 1
+    assert loan_data["id"] == 1
+
+
+    #checking book available copies amount
+    book_after_return = client.get(f"/books/1")
+    assert book_after_return.get_json()["available_copies"] == 0
