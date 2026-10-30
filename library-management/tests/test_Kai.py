@@ -111,3 +111,23 @@ def test_create_member_returns_created_member(client):
     assert data["name"] == "Peter Hollander"
     assert data["email"] == "hollander25@example.com"
     assert data["id"] == 1
+
+def test_get_one_member_returns_correct_member(client):
+    """GET /members/<id> returns the specific member matching the given ID.
+        Test to make sure the member we get from id is the expected member
+    """
+    payload = {
+        "name": "Peter Hollander",
+        "email": "hollander25@example.com",
+    }
+    client.post("/members", json=payload)#add member
+
+
+    response = client.get(f"/members/1") #get member
+    assert response.status_code == 200
+
+
+    #check that it's correct member
+    data = response.get_json()
+    assert data["id"] == 1
+    assert data["name"] == "Peter Hollander"
