@@ -170,6 +170,7 @@ def test_check_out_book_creates_loan_and_decrements_copies(client):
     book_after_return = client.get(f"/books/1")
     assert book_after_return.get_json()["available_copies"] == 0
 
+
 def test_check_out_book_only_decrements_copies_when_available(client):
     """POST /loans successfully checks out a book, creating a loan record and reducing available copies.
         Tests to make sure that a checked out book is only deremeneted when there is copy available.
@@ -231,5 +232,3 @@ def test_check_out_book_where_starting_with_no_copies(client):
     book_after_return = client.get(f"/books/1")
     assert book_after_return.get_json()["available_copies"] == 0
 
-    
-    

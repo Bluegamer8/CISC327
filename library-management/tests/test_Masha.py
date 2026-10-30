@@ -148,3 +148,25 @@ def test_update_nonexistant_value(client):
      })
 
     assert response.status_code == 404
+
+
+def test_empty_genre_case(client):
+    """ Test ensuring empty genre replaces genre with "Unknown" """  
+
+    # create book 
+    response = client.post("/books", json= {
+        "title": "Cherry Grotter",
+        "author": "JK. R",
+        "isbn": "24999-000",
+        "total_copies": 2,
+     })
+
+    # Check that the update response is correct.
+    assert response.status_code == 201
+    data = response.get_json()
+    assert data["title"] == "Cherry Grotter"
+    assert data["author"] == "JK. R"
+    assert data["genre"] == "Unknown"
+    assert data["total_copies"] == 2
+    assert data["id"] == 1
+

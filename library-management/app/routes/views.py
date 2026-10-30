@@ -18,19 +18,27 @@ def home():
 @views_bp.route("/ui/books", methods=["GET", "POST"])
 def books_page():
     if request.method == "POST":
-        total_copies = int(request.form["total_copies"])
+        total_copies = int(request.form.get("total_copies", 1))
+        
+        # Check if genre was left blank or empty, and default to "Unknown"
+        genre_input = request.form.get("genre", "").strip()
+        genre1 = genre_input if genre_input else "Unknown"
+
+        
         book_id = store.next_id("book")
+
         book = Book(
             id=book_id,
             title=request.form["title"],
             author=request.form["author"],
-            genre=request.form["genre"],
+            genre=genre1,  # Uses "Unknown" if left blank
             isbn=request.form["isbn"],
             total_copies=total_copies,
             available_copies=total_copies,
         )
         store.books[book_id] = book
         return redirect(url_for("views.books_page"))
+        
     return render_template("books.html", books=store.books.values())
 
 
