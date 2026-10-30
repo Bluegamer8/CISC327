@@ -28,6 +28,7 @@ def checkout_book():
     book = store.books.get(data["book_id"])
     if book is None:
         return jsonify({"error": "Book not found"}), 404
+    
 
     book.available_copies -= 1
 

@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, render_template, redirect, url_for
 
 from app import store
 from app.models.book import Book
@@ -23,6 +23,7 @@ def create_book():
         id=book_id,
         title=data["title"],
         author=data["author"],
+        genre=data["genre"],
         isbn=data["isbn"],
         total_copies=data.get("total_copies", 1),
         available_copies=data.get("total_copies", 1),
@@ -47,6 +48,7 @@ def update_book(book_id):
     data = request.get_json()
     book.title = data.get("title", book.title)
     book.author = data.get("author", book.author)
+    book.genre = data.get("genre", book.genre)
     book.isbn = data.get("isbn", book.isbn)
     book.total_copies = data.get("total_copies", book.total_copies)
     book.available_copies = data.get("available_copies", book.available_copies)
@@ -59,3 +61,42 @@ def delete_book(book_id):
     if book is None:
         return jsonify({"error": "Book not found"}), 404
     return "", 204
+
+
+
+# Edit book
+
+@books_bp.route("/<int:book_id>", methods=["PUT", "POST"])
+def change_book(book_id):
+    book = store.books.get(book_id)
+    if book is None:
+        return jsonify({"error": "Book not found"}), 404
+
+    if request.is_json:
+        data = request.get_json()
+    else:
+        data = request.form
+
+    book.title = data.get("title", book.title)
+    book.author = data.get("author", book.author)
+    book.isbn = data.get("isbn", book.isbn)
+    book.genre = data.get("genre", book.genre)
+    
+    if "total_copies" in data:
+        book.total_copies = int(data.get("total_copies"))
+
+    if request.is_json:
+        return jsonify(book.to_dict()), 200
+    else:
+        return redirect(url_for("views.books_page")) 
+
+
+
+@books_bp.route("/<int:book_id>/edit", methods=["GET"])
+def edit_book_page(book_id):
+    book = store.books.get(book_id)
+    if book is None:
+        return "Book not found", 404
+    return render_template("edit_book.html", book=book)
+
+
