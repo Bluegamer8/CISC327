@@ -77,7 +77,7 @@ def test_delete_member_removes_from_store(client):
 
 def test_delete_book_removes_from_library(client):
     """Test deleting a book removes it from the library."""
-    
+
     # Create the book in the system.
     client.post("/books", json= {
         "title": "Cherry Grotter",
@@ -93,3 +93,28 @@ def test_delete_book_removes_from_library(client):
     # Check that the book can no longer be found.
     get_response = client.get("/books/1")
     assert get_response.status_code == 404
+
+
+def test_look_up_loans_return_list(client):
+    """Test looking up loans returns a list."""
+    
+    # Create a book and a member, then create a loan.
+    client.post("/books", json={
+        "title": "Hamlet", "author": "Jane Doe", "isbn": "12345", "total_copies": 2
+    })
+    client.post("/members", json={
+        "name": "Bob",
+        "email": "bob@email.com"
+    })
+    client.post("/loans", json={"book_id": 1, "member_id": 1})
+
+    # Get the list of loans from the system.
+    response = client.get("/loans")
+
+    # Check that the loans list is correct.
+    assert response.status_code == 200
+    loans = response.get_json()
+    assert isinstance(loans, list)
+    assert len(loans) == 1
+    assert loans[0]["book_id"] == 1
+    assert loans[0]["member_id"] == 1
