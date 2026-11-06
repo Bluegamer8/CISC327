@@ -4,6 +4,7 @@ from flask import Blueprint, jsonify, request
 
 from app import store
 from app.models.loan import Loan, LOAN_PERIOD_DAYS
+from notification_service import send_notification
 
 FINE_PER_DAY = 0.25  # dollars charged per day overdue
 
@@ -43,7 +44,20 @@ def checkout_book():
         due_date=Loan.default_due_date(),
     )
     store.loans[loan_id] = loan
-    return jsonify(loan.to_dict()), 201
+
+    member = store.members.get(data["member_id"]) #get member
+    if member is None:
+        member_email = "unknown@example.com" # error handeling incase member is for some reason not gotten
+    else:
+        member_email = member.email #set email in normal case to the members email
+
+    subject = "City Library Book Checkout Confirmation"#make subject
+    message = f"You have successfully checked out {book.title}. It is due on {loan.due_date}."# make message
+    sent = send_notification(member_email, subject, message) #sends the notification 
+    
+    response_data = loan.to_dict()
+    response_data["notified"] = sent  # Include notification status in the response
+    return jsonify(response_data), 201
 
 
 
