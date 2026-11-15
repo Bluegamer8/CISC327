@@ -69,8 +69,169 @@ def test_checkout_sends_notification_mock_success(client):
             f"You have successfully checked out The Hunger Games. It is due on {data['due_date']}."
         )
 
+# _____Testing For Step 3 of assignment 3_____________________________________________________________________
+
+#Reservation.py testing
+def test_reservations_created(client):
+        """A member POSTed to /reservations is returned with correct id book and and member.
+        Testing to make sure the reservation is created properly and makes in the system
+        """
+
+        payload1 = {
+                "title": "The Hunger Games",
+                "author": "Suzanne Collins",
+                "isbn": "978-0123456789",
+                "total_copies": 1,
+        }
+        client.post("/books", json=payload1)#add book
+
+        payload2 = {
+                "name": "Peter Hollander",
+                "email": "hollander25@example.com",
+        }
+        client.post("/members", json=payload2)#add memeber
+
+        res_payload = {
+                "book_id": 1,
+                "member_id": 1,
+        }
+        responce = client.post("/reservations", json=res_payload)#add reservation
+        assert responce.status_code == 201#make sure reservation is made
+        
+        
+        #checking for correct reservation
+        res_data = responce.get_json()
+        assert res_data["book_id"] == 1
+        assert res_data["member_id"] == 1
+        assert res_data["id"] == 1
+        assert res_data["fulfilled"] == False
+
+def test_reservations_search_by_book_id(client):
+    """Testing to make sure filtering reservations by book_id works properly in the system.
+    """
+    payload_book1 = {
+        "title": "The Hunger Games",
+        "author": "Suzanne Collins",
+        "isbn": "978-0123456789",
+        "total_copies": 2,
+    }
+    client.post("/books", json=payload_book1)  # add book 1
+
+    payload_book2 = {
+        "title": "Catching Fire",
+        "author": "Suzanne Collins",
+        "isbn": "978-0987654321",
+        "total_copies": 2,
+    }
+    client.post("/books", json=payload_book2)  # add book 2
+
+    payload_member = {
+        "name": "Peter Hollander",
+        "email": "hollander25@example.com",
+    }
+    client.post("/members", json=payload_member)  # add member
+
+    res_payload1 = {
+        "book_id": 1,
+        "member_id": 1,
+    }
+    client.post("/reservations", json=res_payload1)  # add reservation 1
+
+    res_payload2 = {
+        "book_id": 2,
+        "member_id": 1,
+    }
+    client.post("/reservations", json=res_payload2)  # add reservation 2
+
+    # checking filter by book_id
+    response = client.get("/reservations?book_id=1")
+    assert response.status_code == 200
+
+    data = response.get_json()
+    assert len(data) ==  1
+    assert data[0]["id"] == 1
+    assert data[0]["book_id"] == 1
+    assert data[0]["member_id"] == 1
+    assert data[0]["fulfilled"] is False
 
 
+def test_reservations_search_by_member_id(client):
+    """Testing to make sure filtering reservations by member_id works properly in the system.
+    """
+    payload_book = {
+        "title": "The Hunger Games",
+        "author": "Suzanne Collins",
+        "isbn": "978-0123456789",
+        "total_copies": 2,
+    }
+    client.post("/books", json=payload_book)  # add book
 
+    payload_member1 = {
+        "name": "Peter Hollander",
+        "email": "hollander25@example.com",
+    }
+    client.post("/members", json=payload_member1)  # add member 1
 
+    payload_member2 = {
+        "name": "Sarah Connor",
+        "email": "connor@example.com",
+    }
+    client.post("/members", json=payload_member2)  # add member 2
+
+    res_payload1 = {
+        "book_id": 1,
+        "member_id": 1,
+    }
+    client.post("/reservations", json=res_payload1)  # add reservation 1
+
+    res_payload2 = {
+        "book_id": 1,
+        "member_id": 2,
+    }
+    client.post("/reservations", json=res_payload2)  # add reservation 2
+
+    # checking filter by member_id
+    response = client.get("/reservations?member_id=2")
+    assert response.status_code == 200
+
+    data = response.get_json()
+    assert len(data) ==  1
+    assert data[0]["id"] == 2
+    assert data[0]["book_id"] == 1
+    assert data[0]["member_id"] == 2
+    assert data[0]["fulfilled"] is False
+
+def test_reservation_no_book(client):
+    """Tests a failure for reservation in case when book doesn't exist 
+    """
+    member_payload = {
+            "name": "Peter Hollander",
+            "email": "hollander25@example.com",
+    }
+    client.post("/members", json=member_payload)#add memeber
+
+    res_payload = {
+            "book_id": 1,
+            "member_id": 1,
+    }
+    responce = client.post("/reservations", json=res_payload)#add reservation
+    assert responce.status_code == 404#make sure it fails
+
+def test_reservation_no_member(client):
+    """Tests a failure for reservation in case when member doesn't exist 
+    """
+    payload1 = {
+            "title": "The Hunger Games",
+            "author": "Suzanne Collins",
+            "isbn": "978-0123456789",
+            "total_copies": 1,
+    }
+    client.post("/books", json=payload1)#add book
+   
+    res_payload = {
+            "book_id": 1,
+            "member_id": 1,
+    }
+    responce = client.post("/reservations", json=res_payload)#add reservation
+    assert responce.status_code == 404#make sure it fails
 
