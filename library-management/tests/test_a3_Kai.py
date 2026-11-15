@@ -323,3 +323,61 @@ def test_get_fine_with_no_loan(client):
       """
       response = client.get("/loans/1/fine")
       assert response.status_code == 404 #fails since loan 1 doesn't exist
+
+
+#book testing
+def test_change_book_post_redirect(client):
+    """ Makes sure the system updates the book and redirects."""
+    payload = {
+        "title": "The Hunger Games",
+        "author": "Suzanne Collins",
+        "isbn": "978-0123456789",
+        "total_copies": 1,
+    }
+    client.post("/books", json=payload)#add book
+    
+    payload2 = {
+        "title": "The Hunger Games 10th Edition",
+        "author": "Suzanne Collins",
+        "isbn": "978-0123456789",
+        "total_copies": 7,
+    }
+   
+    response = client.post("/books/1", data=payload2) 
+    
+    assert response.status_code == 302 #testing for a redirect
+
+    #check that changes are saved properly
+    updated = client.get("/books/1").get_json()
+    assert updated["title"] == "The Hunger Games 10th Edition"
+    assert updated["total_copies"] == 7
+
+def test_list_books_with_search(client):
+        """Testing to make sure able to filer out books by search
+            """
+        payload_book1 = {    
+            "title": "The Hunger Games",
+            "author": "Suzanne Collins",
+            "isbn": "978-0123456789",
+            "total_copies": 2,
+        }
+        client.post("/books", json=payload_book1)  # add book 1
+    
+        payload_book2 = {
+            "title": "Catching Fire",
+            "author": "Suzanne Collins",
+            "isbn": "978-0987654321",
+            "total_copies": 2,
+        }
+        client.post("/books", json=payload_book2)  # add book 2
+        response = client.get("/books?search=The Hunger Games")
+        assert response.status_code == 200
+        data = response.get_json()
+
+        assert len(data) == 1
+        assert data[0]["id"] == 1
+        assert data[0]["title"] == "The Hunger Games"
+        assert data[0]["author"] == "Suzanne Collins"
+        assert data[0]["isbn"] == "978-0123456789"
+        assert data[0]["total_copies"] == 2
+        assert data[0]["available_copies"] == 2
