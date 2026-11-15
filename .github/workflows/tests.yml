@@ -1,0 +1,40 @@
+name: Run Pytest on Library Tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  pytest:
+    name: Run Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      # Clone repository
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # Set up Python
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: library-management/requirements.txt
+
+      # Install dependencies
+      - name: Install Dependencies
+        working-directory: ./library-management-management
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-cov
+
+      # Run pytest with coverage
+      - name: Run Pytest
+        working-directory: ./library-management-management
+        run: python -m pytest -v --cov=app --cov-report=term-missing --cov-fail-under=90
