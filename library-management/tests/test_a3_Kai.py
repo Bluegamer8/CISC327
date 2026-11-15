@@ -235,3 +235,91 @@ def test_reservation_no_member(client):
     responce = client.post("/reservations", json=res_payload)#add reservation
     assert responce.status_code == 404#make sure it fails
 
+#Loans Testing
+def test_renew_loan(client):
+        """renew successfully extends the due date of an active loan."""
+        payload1 = {
+        "title": "The Hunger Games",
+        "author": "Suzanne Collins",
+        "isbn": "978-0123456789",
+        "total_copies": 1,
+        }
+        client.post("/books", json=payload1)#add book
+
+        payload2 = {
+                "name": "Peter Hollander",
+                "email": "hollander25@example.com",
+        }
+        client.post("/members", json=payload2)#add memeber
+
+        loan_payload = {
+                "book_id": 1,
+                "member_id": 1,
+        }
+        loan = client.post("/loans", json=loan_payload)#add loan
+        initial_due_date = loan.get_json()["due_date"]
+
+        # Renew the loan
+        response = client.put("/loans/1/renew")
+        assert response.status_code == 200
+        
+        new_due_date = response.get_json()["due_date"]
+        assert new_due_date != initial_due_date #make sure new due date is note same as old
+
+def test_get_fine(client):
+        """Gets the fines and calculates and returns the fine amount for a loan."""
+        payload1 = {
+                "title": "The Hunger Games",
+                "author": "Suzanne Collins",
+                "isbn": "978-0123456789",
+                "total_copies": 1,
+        }
+        client.post("/books", json=payload1)#add book
+
+        payload2 = {
+                "name": "Peter Hollander",
+                "email": "hollander25@example.com",
+        }
+        client.post("/members", json=payload2)#add memeber
+
+        loan_payload = {
+                "book_id": 1,
+                "member_id": 1,
+        }
+        client.post("/loans", json=loan_payload)#add loan
+        response = client.get("/loans/1/fine")
+        assert response.status_code == 200
+
+        data = response.get_json()
+        assert data["loan_id"] == 1
+        assert isinstance(data["fine_amount"], float)
+
+def test_check_out_book_with_no_book(client):
+    """try to check out but with no existing book
+    """
+    payload1 = {
+        "name": "Peter Hollander",
+        "email": "hollander25@example.com",
+    }
+    client.post("/members", json=payload1)#add memeber
+
+    loan_payload = {
+        "book_id": 1,
+        "member_id": 1,
+    }
+    loan = client.post("/loans", json=loan_payload)#add loan
+    assert loan.status_code == 404 #asserting that there was an error when attemping to make loan
+
+def test_renew_loan_with_no_loan(client):
+        """trys to renew a loan despite the fact the loan does not exist"""
+        
+        # Renew the loan
+        response = client.put("/loans/1/renew")
+        assert response.status_code == 404 # fails cause loan was never created
+
+def test_get_fine_with_no_loan(client):
+      """
+        Attemptign to get the fine from a lone that does not exist
+      """
+      response = client.get("/loans/1/fine")
+      assert response.status_code == 404 #fails since loan 1 doesn't exist
