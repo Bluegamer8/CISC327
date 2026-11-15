@@ -48,7 +48,7 @@ def test_checkout_sends_no_notification_when_book_unavailable(client):
             "name": "Justin Bieber",
             "email": "bieber540@example.com",
         }
-        client.post("/members", json=payload2)  # add member
+        client.post("/members", json=payload2)  # add memberfrom app.store import store
         
         loan_payload = {
             "book_id": 1,
@@ -125,5 +125,101 @@ def test_delete_book_non_existent(client):
     without throwing an error and redirects back to page
     """
     response = client.post("/ui/books/999/delete", follow_redirects=True)
+    
+    assert response.status_code == 200
+
+
+def test_members_page(client):
+    """
+    Checks GET returns 200 OK and POST successfully creates a member 
+    and redirects back to members page
+    """
+
+    response = client.get("/ui/members")
+    assert response.status_code == 200
+
+    # create member
+    form_data = {
+        "name": "Jane D",
+        "email": "dd@gmail.com"
+    }
+    response = client.post("/ui/members", data=form_data, follow_redirects=True)
+    assert response.status_code == 200
+    assert b"Jane D" in response.data
+    assert b"dd@gmail.com" in response.data
+
+
+def test_delete_member_success(client):
+    """
+    Ensures posting to the delete route removes the member from the store.
+    """
+    # create member
+    client.post("/ui/members", data={"name": "Bobby Smith", "email": "bobby@gmail.com"})
+    
+    # delete member
+    response = client.post("/ui/members/1/delete", follow_redirects=True)
+    assert response.status_code == 200
+    assert b"Bobby Smith" not in response.data
+
+
+def test_loans_page(client):
+    """
+    Tests a successful loan creation returns an OK 200 status code
+    """
+
+    client.post("/ui/books", data={
+        "title": "bookbook", "author": "jane", "genre": "none", "isbn": "123-667", "total_copies": "1"
+    })
+    
+    client.post("/ui/members", data={"name": "Jennnie", "email": "jennie@gmail.com"})
+
+    loan_data = {
+        "book_id": "1",
+        "member_id": "1"
+    }
+    response = client.post("/ui/loans", data=loan_data, follow_redirects=True)
+    assert response.status_code == 200
+
+
+def test_loans_page_post_no_available_copies_shows_error(client):
+    """
+    Tests that an attempt to check out a book with 0 available copies 
+    prevents loan creation and displays the 'No available copies.' error message.
+    """
+
+    client.post("/ui/books", data={
+        "title": "bookbook", "author": "jane", "genre": "none", "isbn": "123-667", "total_copies": "0"
+    })
+
+    client.post("/ui/members", data={"name": "Jennnie", "email": "jennie@gmail.com"})
+
+    # Attempt to make a loan
+    loan_data = {
+        "book_id": "1",
+        "member_id": "1"    
+    }
+   
+    response = client.post("/ui/loans", data=loan_data)
+    
+    assert response.status_code == 200
+
+    assert b"No availble copies." in response.data
+
+
+def test_return_loan_page(client):
+    """
+    Tests that posting to the return route successfully updates
+    and redirects back to the loans page
+    """
+    
+    client.post("/ui/books", data={
+        "title": "bookbook", "author": "jane", "genre": "none", "isbn": "123-667", "total_copies": "1"
+    })
+    
+    client.post("/ui/members", data={"name": "Jennnie", "email": "jennie@gmail.com"})
+
+    client.post("/ui/loans", data={"book_id": "1", "member_id": "1"})
+
+    response = client.post("/ui/loans/1/return", follow_redirects=True)
     
     assert response.status_code == 200
