@@ -223,3 +223,5 @@ def test_return_loan_page(client):
     response = client.post("/ui/loans/1/return", follow_redirects=True)
     
     assert response.status_code == 200
+
+#comment to test if CI integration was properly added to main
