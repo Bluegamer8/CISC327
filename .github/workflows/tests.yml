@@ -28,7 +28,7 @@ jobs:
 
       # Install dependencies
       - name: Install Dependencies
-        working-directory: ./library-management-management
+        working-directory: ./library-management
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
@@ -36,5 +36,5 @@ jobs:
 
       # Run pytest with coverage
       - name: Run Pytest
-        working-directory: ./library-management-management
+        working-directory: ./library-management
         run: python -m pytest -v --cov=app --cov-report=term-missing --cov-fail-under=90
