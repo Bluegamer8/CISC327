@@ -34,6 +34,11 @@ jobs:
           pip install -r requirements.txt
           pip install pytest pytest-cov
 
+      # Install Playwright browser
+      - name: Install Playwright Chromium
+        working-directory: ./inventory-management
+        run: python -m playwright install --with-deps chromium
+
       # Run pytest with coverage
       - name: Run Pytest
         working-directory: ./library-management
