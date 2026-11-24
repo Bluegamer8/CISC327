@@ -10,4 +10,6 @@ COPY . .
 
 EXPOSE 5000
 
+WORKDIR /app/library-management
+
 CMD ["python","run.py"]
