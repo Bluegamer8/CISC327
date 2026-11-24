@@ -57,6 +57,69 @@ app working without a REST client, and calls the same in-memory store.
 
 ## Tests
 
+Uses pytest and playwright for end to end testing
+
+Install play wright and chromium
 ```bash
-pytest
+pip install pytest-playwright
+python -m playwright install chromium
 ```
+Run tests
+```bash
+python -m pytest
+```
+Run end to end test with visable browser:
+
+```bash
+python -m pytest tests/e2e -v --headed
+```
+
+
+## Docker
+
+Build Docker image from project folder
+```bash
+docker build -t cisc327-a4 .
+```
+
+Run Docker container
+
+```bash
+docker run --rm -p 5000:5000 cisc327-a4
+```
+
+The application runs on port 5000 at http://localhost:5000. Flask binds to 0.0.0.0 so the service remains accessible outside the container.
+
+Press Ctrl+C in the active terminal to stop the container. Because the --rm flag is set, the container is removed automatically once it stops.
+
+## End to End test with Docker
+Run the docker conatiner and close any other local runs of the program
+```bash
+docker run --rm -p 5000:5000 cisc327-a4
+```
+
+Open another terminal run:
+```bash
+python -m pytest tests/e2e -v --headed
+```
+
+The tests access the application at http://127.0.0.1:5000
+
+## Docker Hub Repository
+```bash
+https://hub.docker.com/r/bluegamer18/cisc327_a4_library/tags
+```
+
+Download the image:
+
+```bash
+docker pull bluegamer18/cisc327_a4_library:latest
+```
+
+Run the downloaded image:
+
+```bash
+docker run --rm -p 5000:5000 cisc327-a4
+```
+
+Note that in memory data does not save after the application is closed
