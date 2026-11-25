@@ -4,11 +4,7 @@ WORKDIR /app
 
 COPY requirements.txt .
 
-<<<<<<< Updated upstream
 RUN pip install --no-cache-dir -r requirements.txt
-=======
-RUN pip install --no-chache-dir -r requirements.txt
->>>>>>> Stashed changes
 
 COPY . .
 
